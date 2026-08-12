@@ -32,11 +32,7 @@ export function ShipmentTable() {
   const [editingShipment, setEditingShipment] = useState<Shipment | null>(null);
   const [formData, setFormData] = useState<Partial<Shipment>>({});
 
-  useEffect(() => {
-    fetchShipments();
-  }, []);
-
-  const fetchShipments = async () => {
+  async function fetchShipments() {
     try {
       const res = await fetch("/api/shipments");
       const data = await res.json();
@@ -46,7 +42,12 @@ export function ShipmentTable() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchShipments();
+  }, []);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this shipment?")) return;

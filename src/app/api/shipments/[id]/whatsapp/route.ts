@@ -63,8 +63,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json(updatedShipment, { status: 200 });
     }
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("WhatsApp trigger error:", error);
-    return NextResponse.json({ error: 'Internal server error', details: error?.message || String(error) }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error', details: (error as Error)?.message || String(error) }, { status: 500 });
   }
 }

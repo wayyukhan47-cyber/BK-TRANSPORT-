@@ -20,7 +20,7 @@ export default function ContactPage() {
       <div className="container mx-auto px-4 max-w-5xl">
         <div className="text-center mb-16">
           <h1 className="text-4xl font-extrabold text-gray-900 mb-4">Get in Touch</h1>
-          <p className="text-lg text-gray-600">Have questions about our freight matching services? We're here to help.</p>
+          <p className="text-lg text-gray-600">Have questions about our freight matching services? We&apos;re here to help.</p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-10">
