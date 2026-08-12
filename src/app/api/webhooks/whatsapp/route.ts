@@ -51,6 +51,8 @@ export async function POST(request: Request) {
         let messageText = "";
         if (message.type === "text") {
           messageText = message.text.body;
+        } else if (message.type === "interactive" && message.interactive.type === "button_reply") {
+          messageText = message.interactive.button_reply.id; // "yes" or "no"
         } else {
           messageText = `[Received non-text message type: ${message.type}]`;
         }
@@ -110,18 +112,27 @@ export async function POST(request: Request) {
             if (lowerText.includes('yes')) {
               await prisma.shipment.update({
                 where: { id: activeShipment.id },
-                data: { botState: 'WAITING_FOR_DRIVER_NO' }
+                data: { botState: 'WAITING_FOR_TRUCK_NO' }
               });
-              await sendWaMessage("Please provide the driver number.");
+              await sendWaMessage("Your truck no. ?");
             } else if (lowerText.includes('no')) {
               await prisma.shipment.update({
                 where: { id: activeShipment.id },
                 data: { botState: null, status: 'CANCELLED' }
               });
-              await sendWaMessage("Shipment cancelled.");
+              await sendWaMessage("Okay no problem, we will find any other.");
             } else {
-              await sendWaMessage("Please reply with 'Yes' or 'No'.");
+              await sendWaMessage("Please reply with 'Yes' or 'No' by tapping a button.");
             }
+          } else if (activeShipment.botState === 'WAITING_FOR_TRUCK_NO') {
+            await prisma.shipment.update({
+              where: { id: activeShipment.id },
+              data: {
+                botState: 'WAITING_FOR_DRIVER_NO',
+                vehicleNo: messageText // Save client's response as truck number
+              }
+            });
+            await sendWaMessage("Driver no. ?");
           } else if (activeShipment.botState === 'WAITING_FOR_DRIVER_NO') {
             await prisma.shipment.update({
               where: { id: activeShipment.id },
@@ -131,7 +142,7 @@ export async function POST(request: Request) {
                 driverPhone: messageText
               }
             });
-            await sendWaMessage("Congratulations you have won this deal.");
+            await sendWaMessage("Congratulations you are the winner of this offer !");
           }
         }
       }

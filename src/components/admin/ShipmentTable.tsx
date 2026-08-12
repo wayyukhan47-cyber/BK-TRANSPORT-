@@ -32,6 +32,8 @@ export function ShipmentTable() {
   const [editingShipment, setEditingShipment] = useState<Shipment | null>(null);
   const [formData, setFormData] = useState<Partial<Shipment>>({});
 
+  const [clients, setClients] = useState<any[]>([]);
+
   async function fetchShipments() {
     try {
       const res = await fetch("/api/shipments");
@@ -44,9 +46,19 @@ export function ShipmentTable() {
     }
   }
 
+  async function fetchClients() {
+    try {
+      const res = await fetch("/api/clients");
+      const data = await res.json();
+      setClients(data);
+    } catch (err) {
+      console.error("Failed to fetch clients", err);
+    }
+  }
+
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchShipments();
+    fetchClients();
   }, []);
 
   const handleDelete = async (id: string) => {
@@ -81,6 +93,7 @@ export function ShipmentTable() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      let savedShipment = null;
       if (editingShipment) {
         // Update
         const res = await fetch(`/api/shipments/${editingShipment.id}`, {
@@ -90,17 +103,32 @@ export function ShipmentTable() {
         });
         const updated = await res.json();
         setShipments(shipments.map(s => s.id === updated.id ? updated : s));
+        savedShipment = updated;
       } else {
         // Create
+        // ensure required fields are present if not filled yet (they will be filled via bot)
+        const payload = {
+          ...formData,
+          vehicleNo: formData.vehicleNo || "TBD",
+          driverPhone: formData.driverPhone || "TBD"
+        };
         const res = await fetch("/api/shipments", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         });
         const created = await res.json();
         setShipments([created, ...shipments]);
+        savedShipment = created;
       }
+      
       setIsModalOpen(false);
+      
+      // If we just created it and it's a new offer, ask to send whatsapp
+      if (!editingShipment && confirm("Offer created! Do you want to send the WhatsApp message now?")) {
+         handleTriggerBot(savedShipment.id);
+      }
+      
     } catch (err) {
       console.error("Failed to save", err);
     }
@@ -253,32 +281,65 @@ export function ShipmentTable() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-              <h3 className="text-xl font-bold text-gray-900">{editingShipment ? "Edit Shipment" : "New Shipment"}</h3>
+              <h3 className="text-xl font-bold text-gray-900">{editingShipment ? "Edit Shipment" : "Create New WhatsApp Offer"}</h3>
               <button onClick={() => setIsModalOpen(false)} className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <form onSubmit={handleSave} className="p-6 space-y-6">
               <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2 col-span-2">
+                  <label className="text-sm font-semibold text-gray-700">Select Client (Owner)</label>
+                  <select 
+                    required 
+                    className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 bg-white" 
+                    value={clients.find(c => c.phone === formData.ownerPhone)?.id || ""}
+                    onChange={e => {
+                      const selected = clients.find(c => c.id === e.target.value);
+                      if (selected) {
+                        setFormData({
+                          ...formData, 
+                          ownerName: selected.name, 
+                          ownerPhone: selected.phone,
+                          vehicleNo: selected.truckNumber || ""
+                        });
+                      }
+                    }}
+                  >
+                    <option value="" disabled>-- Select a Client --</option>
+                    {clients.map(client => (
+                      <option key={client.id} value={client.id}>
+                        {client.name} ({client.phone})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                {/* Fallbacks in case client isn't fully set up or we want to override manually */}
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">Owner Name</label>
-                  <input required type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 bg-white" 
-                    value={formData.ownerName || ""} onChange={e => setFormData({...formData, ownerName: e.target.value})} />
+                  <input required type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 bg-gray-50" 
+                    value={formData.ownerName || ""} readOnly />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">Owner Phone (WhatsApp)</label>
-                  <input required type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 bg-white" 
-                    value={formData.ownerPhone || ""} onChange={e => setFormData({...formData, ownerPhone: e.target.value})} />
+                  <input required type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 bg-gray-50" 
+                    value={formData.ownerPhone || ""} readOnly />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">Vehicle Number (Optional)</label>
+                  <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 bg-white" 
+                    value={formData.vehicleNo || ""} onChange={e => setFormData({...formData, vehicleNo: e.target.value})} 
+                    placeholder="TBD (Bot will ask)"
+                  />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">Vehicle Number</label>
-                  <input required type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 bg-white" 
-                    value={formData.vehicleNo || ""} onChange={e => setFormData({...formData, vehicleNo: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">Driver Phone</label>
-                  <input required type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 bg-white" 
-                    value={formData.driverPhone || ""} onChange={e => setFormData({...formData, driverPhone: e.target.value})} />
+                  <label className="text-sm font-semibold text-gray-700">Driver Phone (Optional)</label>
+                  <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 bg-white" 
+                    value={formData.driverPhone || ""} onChange={e => setFormData({...formData, driverPhone: e.target.value})} 
+                    placeholder="TBD (Bot will ask)"
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">Pickup Location</label>

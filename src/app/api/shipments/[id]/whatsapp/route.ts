@@ -21,11 +21,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       console.warn("WhatsApp credentials missing in .env");
     }
 
-    const messageText = `Heyy! ${shipment.ownerName} your vehicle no. ${shipment.vehicleNo} is ready for ship our product from ${shipment.pickupLocation} to ${shipment.dropLocation} at the rs ${shipment.offeredAmount}. Options: Yes or No`;
-    
     const phoneNumber = shipment.ownerPhone.replace(/\D/g, ''); // Extract just digits
 
     let success = false;
+
+    const payload = {
+      messaging_product: "whatsapp",
+      to: phoneNumber,
+      type: "interactive",
+      interactive: {
+        type: "button",
+        body: {
+          text: `Heyy! Are you ready for this offer ₹${shipment.offeredAmount} from ${shipment.pickupLocation} to ${shipment.dropLocation}?`
+        },
+        action: {
+          buttons: [
+            { type: "reply", reply: { id: "yes", title: "Yes" } },
+            { type: "reply", reply: { id: "no", title: "No" } }
+          ]
+        }
+      }
+    };
 
     if (WHATSAPP_ACCESS_TOKEN && WHATSAPP_PHONE_ID) {
       const waResponse = await fetch(`https://graph.facebook.com/v17.0/${WHATSAPP_PHONE_ID}/messages`, {
@@ -34,12 +50,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           'Authorization': `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          messaging_product: "whatsapp",
-          to: phoneNumber,
-          type: "text",
-          text: { body: messageText }
-        })
+        body: JSON.stringify(payload)
       });
 
       if (!waResponse.ok) {
@@ -49,7 +60,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       }
       success = true;
     } else {
-      console.log("Mocking WhatsApp send since credentials are missing. Message:", messageText);
+      console.log("Mocking WhatsApp send since credentials are missing. Message:", payload.interactive.body.text);
       success = true;
     }
 
