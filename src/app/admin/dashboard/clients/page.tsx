@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Plus, Edit2, Trash2, X } from "lucide-react";
+import { Search, Plus, Trash2, X } from "lucide-react";
 
 type Client = {
   id: string;
@@ -23,10 +23,6 @@ export default function ClientsPage() {
   const [truckNumber, setTruckNumber] = useState("");
   const [address, setAddress] = useState("");
 
-  useEffect(() => {
-    fetchClients();
-  }, []);
-
   const fetchClients = async () => {
     setIsLoading(true);
     try {
@@ -40,6 +36,11 @@ export default function ClientsPage() {
     }
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchClients();
+  }, []);
 
   const handleCreateClient = async (e: React.FormEvent) => {
     e.preventDefault();

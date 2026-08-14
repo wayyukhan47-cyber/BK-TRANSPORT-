@@ -32,6 +32,7 @@ export function ShipmentTable() {
   const [editingShipment, setEditingShipment] = useState<Shipment | null>(null);
   const [formData, setFormData] = useState<Partial<Shipment>>({});
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [clients, setClients] = useState<any[]>([]);
 
   async function fetchShipments() {
@@ -57,6 +58,7 @@ export function ShipmentTable() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchShipments();
     fetchClients();
   }, []);
