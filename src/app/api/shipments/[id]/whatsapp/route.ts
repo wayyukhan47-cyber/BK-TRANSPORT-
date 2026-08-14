@@ -21,7 +21,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       console.warn("WhatsApp credentials missing in .env");
     }
 
-    const phoneNumber = shipment.ownerPhone.replace(/\D/g, ''); // Extract just digits
+    let phoneNumber = shipment.ownerPhone.replace(/\D/g, ''); // Extract just digits
+    if (phoneNumber.length === 10) {
+      phoneNumber = `91${phoneNumber}`;
+    }
 
     let success = false;
 
