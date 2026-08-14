@@ -91,7 +91,7 @@ export default function ClientsPage() {
           <input 
             type="text" 
             placeholder="Search by name or phone..." 
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-shadow"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-gray-900 transition-shadow"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -171,7 +171,7 @@ export default function ClientsPage() {
                 <input 
                   type="text" 
                   required
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors" 
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-gray-900 transition-colors" 
                   value={name} 
                   onChange={(e) => setName(e.target.value)} 
                 />
@@ -182,7 +182,7 @@ export default function ClientsPage() {
                   type="text" 
                   required
                   placeholder="e.g. 919876543210 (include country code)"
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors" 
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-gray-900 transition-colors" 
                   value={phone} 
                   onChange={(e) => setPhone(e.target.value)} 
                 />
@@ -192,7 +192,7 @@ export default function ClientsPage() {
                 <input 
                   type="text" 
                   placeholder="e.g. MH04 AB 1234"
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors" 
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-gray-900 transition-colors" 
                   value={truckNumber} 
                   onChange={(e) => setTruckNumber(e.target.value)} 
                 />
@@ -201,7 +201,7 @@ export default function ClientsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Address (Optional)</label>
                 <input 
                   type="text" 
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors" 
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-gray-900 transition-colors" 
                   value={address} 
                   onChange={(e) => setAddress(e.target.value)} 
                 />

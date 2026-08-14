@@ -166,7 +166,7 @@ export function ShipmentTable() {
             <input 
               type="text" 
               placeholder="Search by Vehicle or Name..." 
-              className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+              className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm text-gray-900"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
